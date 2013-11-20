@@ -9,10 +9,10 @@ LDLIBS = -llapack -lblas -lm
 SOURCES = testbench.c bulge.c util.c
 ODIR = objDir
 
-test: testbench.x
-	./testbench.x
+test: testbench
+	./testbench
 
-testbench.x: $(patsubst %.c,$(ODIR)/%.o,$(SOURCES)) | $(ODIR)
+testbench: $(patsubst %.c,$(ODIR)/%.o,$(SOURCES)) | $(ODIR)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(ODIR)/%.o: %.c | $(ODIR)
@@ -22,7 +22,7 @@ $(ODIR):
 	mkdir $@
 
 clean: objDir
-	rm -f testbench.x $(patsubst %.c,$(ODIR)/%.o,$(SOURCES)) 
+	rm -f testbench $(patsubst %.c,$(ODIR)/%.o,$(SOURCES)) 
 
 .PHONY: clean .CLEAN
 
