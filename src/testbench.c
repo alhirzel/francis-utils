@@ -83,9 +83,6 @@ void test_qr_algorithm(void) {
 	size_t N = 7;
 	double error, tol = 0.000001;
 
-	size_t i;
-	struct bulge_info bi;
-
 	double shifts[2];
 
 	do {

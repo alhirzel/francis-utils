@@ -4,7 +4,7 @@ CC = gcc
 CFLAGS = -I/usr/local/include
 CFLAGS += -Wall#-pedantic -Wall
 LDFLAGS = -L/usr/lib -L/usr/lib64/atlas
-LDLIBS = -llapack -lblas -lm
+LDLIBS = -lgsl -llapack -lblas -lm
 #-llapack_atlas -latlas
 SOURCES = testbench.c bulge.c util.c
 ODIR = objDir
