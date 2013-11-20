@@ -3,6 +3,8 @@
 
 #include "util.h"
 #include <stdio.h>
+#include <math.h>
+//#define UNCLEAN_MATRICES 1
 
 
 
@@ -16,11 +18,23 @@
  */
 void showmat(size_t nrows, size_t ncols, double *M) {
 	int r, c;
+#ifdef UNCLEAN_MATRICES
+	int insignificant = 0;
+#endif
 
 	printf("M=[");
 	for (r = 0; r < nrows; r++) {
 		for (c = 0; c < ncols; c++) {
-			printf("\t%+3.6f", M[c + r*ncols]);
+#ifdef UNCLEAN_MATRICES
+			insignificant = (fabs(M[c + r*ncols]) < 0.001);
+			if (insignificant) {
+				printf("\t          ");
+			} else {
+#endif
+				printf("\t%+3.6f", M[c + r*ncols]);
+#ifdef UNCLEAN_MATRICES
+			}
+#endif
 
 			/* formatting and frill */
 			if (c == ncols - 1) {
@@ -30,7 +44,13 @@ void showmat(size_t nrows, size_t ncols, double *M) {
 					printf(";\n");
 				}
 			} else {
-				putchar(',');
+#ifdef UNCLEAN_MATRICES
+				if (!insignificant) {
+#endif
+					putchar(',');
+#ifdef UNCLEAN_MATRICES
+				}
+#endif
 			}
 		}
 	}
