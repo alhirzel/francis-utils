@@ -5,6 +5,8 @@
 #define UTIL_H
 #include <stddef.h>
 
+void set_zero_slt(size_t nrows, size_t ncols, double *M, size_t stride);
+
 void showmat(size_t nrows, size_t ncols, double *M);
 void smd(const char *description, size_t nrows, size_t ncols, double *M);
 
