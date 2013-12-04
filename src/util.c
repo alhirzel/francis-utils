@@ -4,7 +4,7 @@
 #include "util.h"
 #include <stdio.h>
 #include <math.h>
-//#define UNCLEAN_MATRICES 1
+#define OCTAVE_INCOMPATIBLE_SHOWMAT 1
 
 
 
@@ -29,21 +29,21 @@ void set_zero_slt(size_t nrows, size_t ncols, double *M, size_t stride) {
  */
 void showmat(size_t nrows, size_t ncols, double *M) {
 	int r, c;
-#ifdef UNCLEAN_MATRICES
+#ifdef OCTAVE_INCOMPATIBLE_SHOWMAT
 	int insignificant = 0;
 #endif
 
 	printf("M=[");
 	for (r = 0; r < nrows; r++) {
 		for (c = 0; c < ncols; c++) {
-#ifdef UNCLEAN_MATRICES
+#ifdef OCTAVE_INCOMPATIBLE_SHOWMAT
 			insignificant = (fabs(M[c + r*ncols]) < 0.001);
 			if (insignificant) {
 				printf("\t          ");
 			} else {
 #endif
 				printf("\t%+3.6f", M[c + r*ncols]);
-#ifdef UNCLEAN_MATRICES
+#ifdef OCTAVE_INCOMPATIBLE_SHOWMAT
 			}
 #endif
 
@@ -55,11 +55,11 @@ void showmat(size_t nrows, size_t ncols, double *M) {
 					printf(";\n");
 				}
 			} else {
-#ifdef UNCLEAN_MATRICES
+#ifdef OCTAVE_INCOMPATIBLE_SHOWMAT
 				if (!insignificant) {
 #endif
 					putchar(',');
-#ifdef UNCLEAN_MATRICES
+#ifdef OCTAVE_INCOMPATIBLE_SHOWMAT
 				}
 #endif
 			}
