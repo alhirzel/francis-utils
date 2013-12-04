@@ -160,6 +160,8 @@ void test_bulge_inflate(int argc, char *argv[]) {
 
 	struct bulge_info forward, backward;
 
+	//double forward_shifts[] = {1.99, 5.0};
+	//double backward_shifts[] = {2.01, 3.0};
 	double forward_shifts[] = {2.0, 3.0};
 	double backward_shifts[] = {1.0/2.0, 1.0/3.0};
 
@@ -210,6 +212,9 @@ void test_bulge_inflate(int argc, char *argv[]) {
 	/* Rotation matrix from the Schur decomposition */
 	double *Q = calloc(bbs*bbs, sizeof(double));
 
+	/* Temporary vector for gemv */
+	double *temp = calloc(bbs, sizeof(double));
+
 	/* Wrap matrices in GSL objects */
 	gsl_matrix Am, Qm;
 	Am.size1 = Am.size2 = Qm.size1 = Qm.size2 = bbs;
@@ -235,13 +240,13 @@ void test_bulge_inflate(int argc, char *argv[]) {
 
 	/* vertical spike (a col) */
 	V = &A[bbp-1 + (bbp)*N];
-	cblas_dgemv(CblasRowMajor, CblasNoTrans, bbs, bbs, 1.0, Q, bbs, V, N, 0, V, N);
+	cblas_dgemv(CblasRowMajor, CblasTrans, bbs, bbs, 1.0, Q, bbs, V, N, 0.0, temp, 1);
+	cblas_dcopy(bbs, temp, 1, V, N);
 
 	/* horizontal spike (a row) */
 	V = &A[bbp + (bbp+bbs)*N];
-	cblas_dgemv(CblasRowMajor, CblasTrans, bbs, bbs, 1.0, Q, bbs, V, 1, 0, V, 1);
-
-	ssmd("Q", bbs, Q);
+	cblas_dgemv(CblasRowMajor, CblasTrans, bbs, bbs, 1.0, Q, bbs, V, 1, 0.0, temp, 1);
+	cblas_dcopy(bbs, temp, 1, V, 1);
 
 	ssmd("A after spikes, before propagation", N, A);
 
@@ -251,18 +256,20 @@ void test_bulge_inflate(int argc, char *argv[]) {
 	/* cols */
 	for (i = bbs+bbp; i < N; i++) {
 		V = &A[i + bbp*N];
-		cblas_dgemv(CblasRowMajor, CblasNoTrans, bbs, bbs, 1.0, Q, bbs, V, N, 0, V, N);
+		cblas_dgemv(CblasRowMajor, CblasTrans, bbs, bbs, 1.0, Q, bbs, V, N, 0, temp, 1);
+		cblas_dcopy(bbs, temp, 1, V, N);
 	}
 
 	/* rows */
 	for (i = 0; i < bbp; i++) {
 		V = &A[bbp + i*N];
-		cblas_dgemv(CblasRowMajor, CblasNoTrans, bbs, bbs, 1.0, Q, bbs, V, 1, 0, V, 1);
+		cblas_dgemv(CblasRowMajor, CblasTrans, bbs, bbs, 1.0, Q, bbs, V, 1, 0, temp, 1);
+		cblas_dcopy(bbs, temp, 1, V, 1);
 	}
 
 	ssmd("A after spikes and propagation", N, A);
-	// EIGENVALUES ARE NOT THE SAME!!!!
 
+	free(temp);
 }
 
 

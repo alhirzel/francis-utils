@@ -4,6 +4,9 @@
 // stdio for debugging
 #include <stdio.h>
 
+// for calloc
+#include <stdlib.h>
+
 #include <cblas.h>
 #include "bulge.h"
 #include "util.h"
@@ -52,6 +55,9 @@ int form_bulge(struct bulge_info *bi, const size_t order, double *M, const size_
 	size_t bulge_size, bulge_position, householder_stride, shiftidx, r, c;
 	double house[(nshifts + 2) * (nshifts + 2 + 1)/2];
 	short M_data_stride_sign;
+
+	/* Temporary vector for gemv */
+	double *temp = calloc(nshifts+2, sizeof(double));
 
 	/* populate bulge_info structure now so it can serve as a useful "return
 	 * value" */
@@ -104,19 +110,23 @@ int form_bulge(struct bulge_info *bi, const size_t order, double *M, const size_
 		/* use house to process each small col and row which intersects with the bulge zone */
 		r = bulge_position;
 		for (c = 0; c < order; c++) { /* small cols */
+			cblas_dcopy(bulge_size, &M[c + r*order], M_data_stride_sign*order, temp, 1);
 			cblas_dspmv(CblasRowMajor, CblasUpper, bulge_size, -2.0, house,
 				&M[c + r*order], M_data_stride_sign*order,
 				1.0,
-				&M[c + r*order], M_data_stride_sign*order);
+				temp, 1);
+			cblas_dcopy(bulge_size, temp, 1, &M[c + r*order], M_data_stride_sign*order);
 		}
 
 		c = bulge_position;
 		for (r = 0; r < order; r++) { /* small rows */
 			/* if house weren't symmetric, this would require a transpose */
+			cblas_dcopy(bulge_size, &M[c + r*order], M_data_stride_sign*1, temp, 1);
 			cblas_dspmv(CblasRowMajor, CblasUpper, bulge_size, -2.0, house,
 				&M[c + r*order], M_data_stride_sign*1,
 				1.0,
-				&M[c + r*order], M_data_stride_sign*1);
+				temp, 1);
+			cblas_dcopy(bulge_size, temp, 1, &M[c + r*order], M_data_stride_sign*1);
 		}
 
 		/* OPTIMIZATION: we can unroll the first few hits to the above loops
@@ -126,6 +136,7 @@ int form_bulge(struct bulge_info *bi, const size_t order, double *M, const size_
 		bi->nshifts_applied = shiftidx + 1;
 	}
 
+	free(temp);
 	return (order - 2); /* number of shifts needed to eradicate the bulge */
 }
 
@@ -139,6 +150,9 @@ int chase_bulge_step(struct bulge_info *bi) {
 	size_t bulge_size, bulge_position, householder_stride;
 	short M_data_stride_sign;
 	size_t r, c;
+
+	/* Temporary vector for gemv */
+	double *temp = calloc(bi->nshifts + 2, sizeof(double));
 	
 	/* stop now if we've already chased the bulge off the matrix */
 	int steps_remaining = bi->order - 2 - bi->steps_chased;
@@ -184,10 +198,12 @@ int chase_bulge_step(struct bulge_info *bi) {
 	case CHASE_BACKWARD: r = bulge_position; break;
 	}
 	for (c = 0; c < bi->order; c++) { /* small cols */
+		cblas_dcopy(bulge_size-1, &bi->M[c + r*bi->order], M_data_stride_sign*bi->order, temp, 1);
 		cblas_dspmv(CblasRowMajor, CblasUpper, bulge_size - 1, -2.0, house,
 			&bi->M[c + r*bi->order], M_data_stride_sign*bi->order,
 			1.0,
-			&bi->M[c + r*bi->order], M_data_stride_sign*bi->order);
+			temp, 1);
+		cblas_dcopy(bulge_size-1, temp, 1, &bi->M[c + r*bi->order], M_data_stride_sign*bi->order);
 	}
 
 	switch (bi->direction) {
@@ -195,16 +211,19 @@ int chase_bulge_step(struct bulge_info *bi) {
 	case CHASE_BACKWARD: c = bulge_position; break;
 	}
 	for (r = 0; r < bi->order; r++) { /* small rows */
+		cblas_dcopy(bulge_size-1, &bi->M[c + r*bi->order], M_data_stride_sign*1, temp, 1);
 		cblas_dspmv(CblasRowMajor, CblasUpper, bulge_size - 1, -2.0, house,
 			&bi->M[c + r*bi->order], M_data_stride_sign*1,
 			1.0,
-			&bi->M[c + r*bi->order], M_data_stride_sign*1);
+			temp, 1);
+		cblas_dcopy(bulge_size-1, temp, 1, &bi->M[c + r*bi->order], M_data_stride_sign*1);
 	}
 
 	/* keep an accurate count */
 	bi->steps_chased++;
 	steps_remaining--;
 
+	free(temp);
 	return steps_remaining;
 }
 
