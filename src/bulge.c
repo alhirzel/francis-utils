@@ -247,5 +247,7 @@ int build_and_chase_bulge(size_t order, double *M, size_t nshifts, double *shift
 			return -1;
 		}
 	} while (i > 0);
+
+	return 0;
 }
 
