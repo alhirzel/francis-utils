@@ -112,6 +112,7 @@ int form_bulge(struct bulge_info *bi, const size_t order, double *M, const size_
 
 		c = bulge_position;
 		for (r = 0; r < order; r++) { /* small rows */
+			/* if house weren't symmetric, this would require a transpose */
 			cblas_dspmv(CblasRowMajor, CblasUpper, bulge_size, -2.0, house,
 				&M[c + r*order], M_data_stride_sign*1,
 				1.0,

@@ -4,7 +4,7 @@
 #include "util.h"
 #include <stdio.h>
 #include <math.h>
-#define OCTAVE_INCOMPATIBLE_SHOWMAT 1
+//#define OCTAVE_INCOMPATIBLE_SHOWMAT 1
 
 
 
