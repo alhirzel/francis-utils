@@ -224,7 +224,7 @@ void test_bulge_inflate(int argc, char *argv[]) {
 	gsl_vector_complex *eval = gsl_vector_complex_alloc(bbs);
 	gsl_eigen_nonsymm_params(1, 0, w); // compute full Schur decomp
 	gsl_eigen_nonsymm_Z(&Am, eval, &Qm, w);
-	set_zero_slt(bbs, bbs, &A[bbp + bbp*N], N);
+	set_zero_lt(2, bbs, bbs, &A[bbp + bbp*N], N);
 	gsl_eigen_nonsymm_free(w);
 	gsl_vector_complex_free(eval);
 

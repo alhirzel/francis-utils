@@ -8,12 +8,12 @@
 
 
 
-/** set matrix to zero, strict lower triangular */
-void set_zero_slt(size_t nrows, size_t ncols, double *M, size_t stride) {
+/** set matrix to zero, lower triangular and skip diagonals */
+void set_zero_lt(size_t skip_diagonals, size_t nrows, size_t ncols, double *M, size_t stride) {
 	size_t r, c;
 
-	for (r = 1; r < nrows; r++)
-		for (c = 0; c < r; c++)
+	for (r = skip_diagonals; r < nrows; r++)
+		for (c = 0; c < r - skip_diagonals; c++)
 			M[c + stride*r] = 0.0;
 }
 
