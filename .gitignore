@@ -1,5 +1,6 @@
 *.o
 src/testbench
+src/gradient_compute
 .*.swp
 *.png
 *.gif
